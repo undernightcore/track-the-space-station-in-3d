@@ -18,7 +18,7 @@ export class ThreeCanvasComponent implements AfterViewInit {
   renderer!: Renderer;
   camera!: Camera;
   scene!: Scene;
-  earth!: Earth;
+  earth?: Earth;
   sun!: Sun;
   stars!: Stars;
   iss!: ISS;
@@ -86,8 +86,13 @@ export class ThreeCanvasComponent implements AfterViewInit {
     this.canvasContainer.nativeElement.appendChild(this.renderer.domElement);
   }
 
+  #rotateEarth() {
+    this.earth?.mesh.rotateY(0.00007272205 / 60);
+  }
+
   #startThreeLoop = () => {
     requestAnimationFrame( this.#startThreeLoop );
+    this.#rotateEarth();
     this.renderer.render( this.scene, this.camera );
   }
 
