@@ -8,6 +8,7 @@ import {Sun} from "../../../../models/sun.model";
 import {Stars} from "../../../../models/stars.model";
 import {TLEService} from "../../../../services/tle.service";
 import {ISS} from "../../../../models/iss.model";
+import {VRButton} from "three/examples/jsm/webxr/VRButton";
 
 
 @Component({
@@ -35,8 +36,8 @@ export class ThreeCanvasComponent implements AfterViewInit {
     this.#handleResizing();
     this.#startThreeLoop();
     this.#initializeObjects();
-
-
+    document.body.appendChild(VRButton.createButton(this.renderer));
+    this.renderer.xr.enabled = true;
   }
 
 
@@ -55,6 +56,7 @@ export class ThreeCanvasComponent implements AfterViewInit {
     this.camera = this.rendererService.camera;
     this.#createCanvasContainer();
     this.rendererService.resizeRenderer();
+
   }
 
   #initializeObjects() {
