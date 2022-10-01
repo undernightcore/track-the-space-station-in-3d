@@ -19,7 +19,7 @@ export class RendererService {
   }
 
   #initialize() {
-    this.#camera.position.set(0, 0, 150020000);
+    this.#camera.position.z = -100000000000
     this.#controls.target.set(0, 0, 150000000);
     this.resizeRenderer();
   }
@@ -30,6 +30,10 @@ export class RendererService {
 
   get camera() {
     return this.#camera;
+  }
+
+  get controls() {
+    return this.#controls;
   }
 
   resizeRenderer() {

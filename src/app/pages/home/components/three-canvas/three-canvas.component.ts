@@ -1,12 +1,14 @@
 import {AfterViewInit, Component, ElementRef, ViewChild} from '@angular/core';
-import {Camera, Renderer, Scene} from "three";
+import {Camera, PerspectiveCamera, Renderer, Scene} from "three";
 import {RendererService} from "../../../../services/renderer.service";
-import {debounceTime, delay, forkJoin, fromEvent, startWith} from "rxjs";
+import {debounceTime, delay, forkJoin, fromEvent, Observable, startWith} from "rxjs";
 import {Earth} from "../../../../models/earth.model";
 import {LoaderService} from "../../../../services/loader.service";
 import {Sun} from "../../../../models/sun.model";
 import {Stars} from "../../../../models/stars.model";
 import {ISS} from "../../../../models/iss.model";
+import {AppManagerService} from "../../../../services/app-manager.service";
+import { gsap } from "gsap";
 
 @Component({
   selector: 'app-three-canvas',
@@ -16,7 +18,7 @@ import {ISS} from "../../../../models/iss.model";
 export class ThreeCanvasComponent implements AfterViewInit {
 
   renderer!: Renderer;
-  camera!: Camera;
+  camera!: PerspectiveCamera;
   scene!: Scene;
   earth!: Earth;
   sun!: Sun;
@@ -25,7 +27,11 @@ export class ThreeCanvasComponent implements AfterViewInit {
 
   @ViewChild('canvasContainer') canvasContainer!: ElementRef;
 
-  constructor(private rendererService: RendererService, private loaderService: LoaderService) { }
+  constructor(
+    private rendererService: RendererService,
+    private loaderService: LoaderService,
+    private appManagerService: AppManagerService
+    ) { }
 
   ngAfterViewInit(): void {
     this.#initializeThree();
@@ -56,15 +62,13 @@ export class ThreeCanvasComponent implements AfterViewInit {
         sun: this.#getSun(),
         iss: this.#getISS()
       }).pipe(delay(2000),startWith(null)).subscribe((textures)=>{
-        if (textures === null){
-          console.log('loading')
-        }else{
-          console.log('not loading')
-          this.sun = new Sun(this.scene,textures.sun)
-          this.earth = new Earth(this.scene, textures.earth)
-          this.stars = new Stars(this.scene, 5000)
-          this.iss = new ISS(this.scene, textures.iss)
-        }
+        if (!textures) return;
+        this.appManagerService.loading.next(false);
+        this.sun = new Sun(this.scene,textures.sun)
+        this.earth = new Earth(this.scene, textures.earth)
+        this.stars = new Stars(this.scene, 5000)
+        this.iss = new ISS(this.scene, textures.iss)
+        this.#startZoomAnimation()
       }
     )
   }
@@ -79,6 +83,27 @@ export class ThreeCanvasComponent implements AfterViewInit {
 
   #getISS() {
     return this.loaderService.loadModel('assets/models/ISS_stationary.glb')
+  }
+
+  #startZoomAnimation() {
+    this.appManagerService.ready.subscribe((status) => {
+      if (!status) return;
+      gsap.fromTo(this.camera.position,
+        {
+          z: 148000000
+        },
+        {
+          z: 150000000 - 6371 - 20000,
+          duration: 5,
+          onStart: () => {
+            this.rendererService.controls.update();
+          },
+          onUpdate: () => {
+            this.camera.updateProjectionMatrix();
+          }
+        }
+      )
+    })
   }
 
 

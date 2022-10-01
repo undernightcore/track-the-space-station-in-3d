@@ -21,6 +21,7 @@
     "@angular/platform-browser-dynamic": "^14.0.0",
     "@angular/router": "^14.0.0",
     "@types/three": "^0.144.0",
+    "gsap": "^3.11.2",
     "rxjs": "~7.5.0",
     "three": "^0.145.0",
     "tle.js": "^4.7.2",
