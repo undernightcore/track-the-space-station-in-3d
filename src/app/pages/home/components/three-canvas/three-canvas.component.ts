@@ -6,6 +6,7 @@ import {Earth} from "../../../../models/earth.model";
 import {LoaderService} from "../../../../services/loader.service";
 import {Sun} from "../../../../models/sun.model";
 import {Stars} from "../../../../models/stars.model";
+import {ISS} from "../../../../models/iss.model";
 
 @Component({
   selector: 'app-three-canvas',
@@ -20,6 +21,7 @@ export class ThreeCanvasComponent implements AfterViewInit {
   earth!: Earth;
   sun!: Sun;
   stars!: Stars;
+  iss!: ISS;
 
   @ViewChild('canvasContainer') canvasContainer!: ElementRef;
 
@@ -51,7 +53,8 @@ export class ThreeCanvasComponent implements AfterViewInit {
   #initializeObjects() {
     forkJoin({
         earth: this.#getEarth(),
-        sun: this.#getSun()
+        sun: this.#getSun(),
+        iss: this.#getISS()
       }).pipe(delay(2000),startWith(null)).subscribe((textures)=>{
         if (textures === null){
           console.log('loading')
@@ -60,6 +63,7 @@ export class ThreeCanvasComponent implements AfterViewInit {
           this.sun = new Sun(this.scene,textures.sun)
           this.earth = new Earth(this.scene, textures.earth)
           this.stars = new Stars(this.scene, 5000)
+          this.iss = new ISS(this.scene, textures.iss)
         }
       }
     )
@@ -72,6 +76,11 @@ export class ThreeCanvasComponent implements AfterViewInit {
   #getSun() {
     return this.loaderService.loadTexture('assets/textures/8k_sun.jpeg')
   }
+
+  #getISS() {
+    return this.loaderService.loadModel('assets/models/ISS_stationary.glb')
+  }
+
 
   #createCanvasContainer() {
     this.canvasContainer.nativeElement.appendChild(this.renderer.domElement);
