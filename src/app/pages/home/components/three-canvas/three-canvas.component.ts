@@ -4,6 +4,7 @@ import {RendererService} from "../../../../services/renderer.service";
 import {debounceTime, fromEvent} from "rxjs";
 import {Earth} from "../../../../models/earth.model";
 import {LoaderService} from "../../../../services/loader.service";
+import {Sun} from "../../../../models/sun.model";
 
 @Component({
   selector: 'app-three-canvas',
@@ -16,6 +17,7 @@ export class ThreeCanvasComponent implements AfterViewInit {
   camera!: Camera;
   scene!: Scene;
   earth!: Earth;
+  sun!: Sun;
 
   @ViewChild('canvasContainer') canvasContainer!: ElementRef;
 
@@ -46,11 +48,18 @@ export class ThreeCanvasComponent implements AfterViewInit {
 
   #initializeObjects() {
     this.#addEarth();
+    this.#addSun();
   }
 
   #addEarth() {
     this.loaderService.loadTexture('assets/textures/8k_earth_daymap.jpeg').subscribe((texture) => {
       this.earth = new Earth(this.scene, texture);
+    })
+  }
+
+  #addSun() {
+    this.loaderService.loadTexture('assets/textures/8k_sun.jpeg').subscribe((texture) => {
+      this.sun = new Sun(this.scene, texture);
     })
   }
 
