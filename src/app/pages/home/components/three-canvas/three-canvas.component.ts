@@ -96,9 +96,11 @@ export class ThreeCanvasComponent implements AfterViewInit {
   }
 
   #startThreeLoop = () => {
-    requestAnimationFrame(this.#startThreeLoop);
-    this.#rotateEarth();
-    this.renderer.render(this.scene, this.camera);
+    this.renderer.setAnimationLoop(() => {
+      this.renderer.render(this.scene, this.camera);
+      this.#rotateEarth();
+    })
+    //requestAnimationFrame(this.#startThreeLoop);
   }
 
 }
