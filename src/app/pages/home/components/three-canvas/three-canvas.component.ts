@@ -1,7 +1,7 @@
 import {AfterViewInit, Component, ElementRef, ViewChild} from '@angular/core';
 import {Camera, Renderer, Scene} from "three";
 import {RendererService} from "../../../../services/renderer.service";
-import {debounceTime, fromEvent} from "rxjs";
+import {debounceTime, delay, forkJoin, fromEvent, startWith} from "rxjs";
 import {Earth} from "../../../../models/earth.model";
 import {LoaderService} from "../../../../services/loader.service";
 import {Sun} from "../../../../models/sun.model";
