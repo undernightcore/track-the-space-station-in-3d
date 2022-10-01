@@ -10,7 +10,8 @@ export class ISS {
   }
 
   #initialize() {
-    this.gltf.scene.position.set(0, 0, 149999600 - 6371)
+    this.gltf.scene.position.set(0, 0, 0)
+    this.gltf.scene.scale.set(10, 10, 10)
     this.scene.add(this.gltf.scene);
   }
 }
