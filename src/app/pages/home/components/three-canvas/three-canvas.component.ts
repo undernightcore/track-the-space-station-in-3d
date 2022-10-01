@@ -1,5 +1,5 @@
 import {AfterViewInit, Component, ElementRef, ViewChild} from '@angular/core';
-import {Camera, Renderer, Scene} from "three";
+import {Camera, Scene, WebGLRenderer} from "three";
 import {RendererService} from "../../../../services/renderer.service";
 import {debounceTime, delay, forkJoin, fromEvent, startWith} from "rxjs";
 import {Earth} from "../../../../models/earth.model";
@@ -7,6 +7,7 @@ import {LoaderService} from "../../../../services/loader.service";
 import {Sun} from "../../../../models/sun.model";
 import {Stars} from "../../../../models/stars.model";
 import {ISS} from "../../../../models/iss.model";
+import {VRButton} from "three/examples/jsm/webxr/VRButton";
 
 @Component({
   selector: 'app-three-canvas',
@@ -15,7 +16,7 @@ import {ISS} from "../../../../models/iss.model";
 })
 export class ThreeCanvasComponent implements AfterViewInit {
 
-  renderer!: Renderer;
+  renderer!: WebGLRenderer;
   camera!: Camera;
   scene!: Scene;
   earth?: Earth;
@@ -25,13 +26,17 @@ export class ThreeCanvasComponent implements AfterViewInit {
 
   @ViewChild('canvasContainer') canvasContainer!: ElementRef;
 
-  constructor(private rendererService: RendererService, private loaderService: LoaderService) { }
+  constructor(private rendererService: RendererService, private loaderService: LoaderService) {
+  }
 
   ngAfterViewInit(): void {
     this.#initializeThree();
     this.#handleResizing();
     this.#startThreeLoop();
     this.#initializeObjects();
+    document.body.appendChild(VRButton.createButton(this.renderer));
+    this.renderer.xr.enabled = true;
+
   }
 
   #handleResizing() {
@@ -52,15 +57,15 @@ export class ThreeCanvasComponent implements AfterViewInit {
 
   #initializeObjects() {
     forkJoin({
-        earth: this.#getEarth(),
-        sun: this.#getSun(),
-        iss: this.#getISS()
-      }).pipe(delay(2000),startWith(null)).subscribe((textures)=>{
-        if (textures === null){
+      earth: this.#getEarth(),
+      sun: this.#getSun(),
+      iss: this.#getISS()
+    }).pipe(delay(2000), startWith(null)).subscribe((textures) => {
+        if (textures === null) {
           console.log('loading')
-        }else{
+        } else {
           console.log('not loading')
-          this.sun = new Sun(this.scene,textures.sun)
+          this.sun = new Sun(this.scene, textures.sun)
           this.earth = new Earth(this.scene, textures.earth)
           this.stars = new Stars(this.scene, 5000)
           this.iss = new ISS(this.scene, textures.iss)
@@ -91,9 +96,9 @@ export class ThreeCanvasComponent implements AfterViewInit {
   }
 
   #startThreeLoop = () => {
-    requestAnimationFrame( this.#startThreeLoop );
+    requestAnimationFrame(this.#startThreeLoop);
     this.#rotateEarth();
-    this.renderer.render( this.scene, this.camera );
+    this.renderer.render(this.scene, this.camera);
   }
 
 }
