@@ -1,10 +1,11 @@
 import {AfterViewInit, Component, ElementRef, ViewChild} from '@angular/core';
 import {Camera, Renderer, Scene} from "three";
 import {RendererService} from "../../../../services/renderer.service";
-import {debounceTime, fromEvent, timer} from "rxjs";
+import {debounceTime, fromEvent} from "rxjs";
 import {Earth} from "../../../../models/earth.model";
 import {LoaderService} from "../../../../services/loader.service";
 import {Sun} from "../../../../models/sun.model";
+import {Stars} from "../../../../models/stars.model";
 
 @Component({
   selector: 'app-three-canvas',
@@ -18,7 +19,7 @@ export class ThreeCanvasComponent implements AfterViewInit {
   scene!: Scene;
   earth?: Earth;
   sun!: Sun;
-  frames = 0;
+  stars!: Stars;
 
   @ViewChild('canvasContainer') canvasContainer!: ElementRef;
 
@@ -48,20 +49,28 @@ export class ThreeCanvasComponent implements AfterViewInit {
   }
 
   #initializeObjects() {
-    this.#addEarth();
-    this.#addSun();
+    forkJoin({
+        earth: this.#getEarth(),
+        sun: this.#getSun()
+      }).pipe(delay(2000),startWith(null)).subscribe((textures)=>{
+        if (textures === null){
+          console.log('loading')
+        }else{
+          console.log('not loading')
+          this.sun = new Sun(this.scene,textures.sun)
+          this.earth = new Earth(this.scene, textures.earth)
+          this.stars = new Stars(this.scene, 5000)
+        }
+      }
+    )
   }
 
-  #addEarth() {
-    this.loaderService.loadTexture('assets/textures/8k_earth_daymap.jpeg').subscribe((texture) => {
-      this.earth = new Earth(this.scene, texture);
-    })
+  #getEarth() {
+    return this.loaderService.loadTexture('assets/textures/8k_earth_daymap.jpeg')
   }
 
-  #addSun() {
-    this.loaderService.loadTexture('assets/textures/8k_sun.jpeg').subscribe((texture) => {
-      this.sun = new Sun(this.scene, texture);
-    })
+  #getSun() {
+    return this.loaderService.loadTexture('assets/textures/8k_sun.jpeg')
   }
 
   #createCanvasContainer() {
