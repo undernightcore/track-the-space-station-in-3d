@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import {PerspectiveCamera, Renderer, WebGLRenderer} from "three";
+import {Injectable} from '@angular/core';
+import {PerspectiveCamera, WebGLRenderer} from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 
 @Injectable({
@@ -9,7 +9,7 @@ export class RendererService {
 
   #camera: PerspectiveCamera;
   #controls: OrbitControls;
-  #renderer: Renderer;
+  #renderer: WebGLRenderer;
 
   constructor() {
     this.#renderer = new WebGLRenderer();
@@ -39,6 +39,6 @@ export class RendererService {
   resizeRenderer() {
     this.#camera.aspect = window.innerWidth / window.innerHeight;
     this.#camera.updateProjectionMatrix();
-    this.#renderer.setSize( window.innerWidth, window.innerHeight );
+    this.#renderer.setSize(window.innerWidth, window.innerHeight);
   }
 }

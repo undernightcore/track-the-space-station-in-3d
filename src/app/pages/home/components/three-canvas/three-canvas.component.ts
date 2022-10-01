@@ -9,6 +9,7 @@ import {Stars} from "../../../../models/stars.model";
 import {ISS} from "../../../../models/iss.model";
 import {AppManagerService} from "../../../../services/app-manager.service";
 import { gsap } from "gsap";
+import {VRButton} from "three/examples/jsm/webxr/VRButton";
 
 @Component({
   selector: 'app-three-canvas',
@@ -17,10 +18,10 @@ import { gsap } from "gsap";
 })
 export class ThreeCanvasComponent implements AfterViewInit {
 
-  renderer!: Renderer;
+  renderer!: WebGLRenderer;
   camera!: PerspectiveCamera;
   scene!: Scene;
-  earth!: Earth;
+  earth?: Earth;
   sun!: Sun;
   stars!: Stars;
   iss!: ISS;
@@ -38,6 +39,9 @@ export class ThreeCanvasComponent implements AfterViewInit {
     this.#handleResizing();
     this.#startThreeLoop();
     this.#initializeObjects();
+    document.body.appendChild(VRButton.createButton(this.renderer));
+    this.renderer.xr.enabled = true;
+
   }
 
   #handleResizing() {
@@ -111,9 +115,14 @@ export class ThreeCanvasComponent implements AfterViewInit {
     this.canvasContainer.nativeElement.appendChild(this.renderer.domElement);
   }
 
+  #rotateEarth() {
+    this.earth?.mesh.rotateY(0.00007272205 / 60);
+  }
+
   #startThreeLoop = () => {
-    requestAnimationFrame( this.#startThreeLoop );
-    this.renderer.render( this.scene, this.camera );
+    requestAnimationFrame(this.#startThreeLoop);
+    this.#rotateEarth();
+    this.renderer.render(this.scene, this.camera);
   }
 
 }
