@@ -1,1 +1,6 @@
+<app-start-screen
+  (ready)="onReady()"
+  [@inOutAnimation]
+  *ngIf="(appManagerService.loading | async) || !(appManagerService.ready | async)">
+</app-start-screen>
 <app-three-canvas></app-three-canvas>
