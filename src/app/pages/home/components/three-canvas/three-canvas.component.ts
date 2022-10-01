@@ -58,6 +58,7 @@ export class ThreeCanvasComponent implements AfterViewInit {
   #initializeObjects() {
     forkJoin({
       earth: this.#getEarth(),
+      darkEarth: this.#getDarkEarth(),
       sun: this.#getSun(),
       iss: this.#getISS()
     }).pipe(delay(2000), startWith(null)).subscribe((textures) => {
@@ -66,7 +67,7 @@ export class ThreeCanvasComponent implements AfterViewInit {
         } else {
           console.log('not loading')
           this.sun = new Sun(this.scene, textures.sun)
-          this.earth = new Earth(this.scene, textures.earth)
+          this.earth = new Earth(this.scene, textures.earth, textures.darkEarth)
           this.stars = new Stars(this.scene, 5000)
           this.iss = new ISS(this.scene, textures.iss)
         }
@@ -76,6 +77,10 @@ export class ThreeCanvasComponent implements AfterViewInit {
 
   #getEarth() {
     return this.loaderService.loadTexture('assets/textures/8k_earth_daymap.jpeg')
+  }
+
+  #getDarkEarth() {
+    return this.loaderService.loadTexture('assets/textures/8k_earth_nightmap.jpeg')
   }
 
   #getSun() {
@@ -96,9 +101,10 @@ export class ThreeCanvasComponent implements AfterViewInit {
   }
 
   #startThreeLoop = () => {
-    requestAnimationFrame(this.#startThreeLoop);
-    this.#rotateEarth();
-    this.renderer.render(this.scene, this.camera);
+    this.renderer.setAnimationLoop(() => {
+      this.renderer.render(this.scene, this.camera);
+      this.#rotateEarth();
+    })
   }
 
 }
