@@ -1,14 +1,14 @@
 import {AfterViewInit, Component, ElementRef, ViewChild} from '@angular/core';
-import {Camera, PerspectiveCamera, Renderer, Scene, WebGLRenderer} from "three";
+import {PerspectiveCamera, Scene, WebGLRenderer} from "three";
 import {RendererService} from "../../../../services/renderer.service";
-import {debounceTime, delay, forkJoin, fromEvent, Observable, startWith} from "rxjs";
+import {debounceTime, delay, forkJoin, fromEvent, startWith} from "rxjs";
 import {Earth} from "../../../../models/earth.model";
 import {LoaderService} from "../../../../services/loader.service";
 import {Sun} from "../../../../models/sun.model";
 import {Stars} from "../../../../models/stars.model";
 import {ISS} from "../../../../models/iss.model";
 import {AppManagerService} from "../../../../services/app-manager.service";
-import { gsap } from "gsap";
+import {gsap} from "gsap";
 import {VRButton} from "three/examples/jsm/webxr/VRButton";
 
 @Component({
@@ -32,7 +32,8 @@ export class ThreeCanvasComponent implements AfterViewInit {
     private rendererService: RendererService,
     private loaderService: LoaderService,
     private appManagerService: AppManagerService
-    ) { }
+  ) {
+  }
 
   ngAfterViewInit(): void {
     this.#initializeThree();
@@ -62,14 +63,14 @@ export class ThreeCanvasComponent implements AfterViewInit {
 
   #initializeObjects() {
     forkJoin({
-                                                        earth: this.#getEarth(),
-        darkEarth: this.#getDarkEarth(),
+      earth: this.#getEarth(),
+      darkEarth: this.#getDarkEarth(),
       sun: this.#getSun(),
       iss: this.#getISS()
     }).pipe(delay(2000), startWith(null)).subscribe((textures) => {
         if (!textures) return;
         this.appManagerService.loading.next(false);
-        this.sun = new Sun(this.scene,textures.sun)
+        this.sun = new Sun(this.scene, textures.sun)
         this.earth = new Earth(this.scene, textures.earth, textures.darkEarth)
         this.stars = new Stars(this.scene, 5000)
         this.iss = new ISS(this.scene, textures.iss)
