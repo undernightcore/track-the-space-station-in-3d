@@ -1,4 +1,5 @@
 import {Mesh, MeshStandardMaterial, Scene, SphereGeometry, Texture} from "three";
+import {DateTime, Interval} from "luxon";
 
 export class Earth {
   mesh: Mesh;
@@ -15,8 +16,16 @@ export class Earth {
   }
 
   #initialize() {
+    this.mesh.rotateY(1.57 * 3);
+    this.mesh.rotateY(this.#getAngleFromDate());
     this.mesh.position.set(0, 0, 150000000);
     this.scene.add(this.mesh);
+  }
+
+  #getAngleFromDate() {
+    const startOfDay = DateTime.now().toUTC().startOf('day');
+    const now = DateTime.now().toUTC();
+    return Interval.fromDateTimes(startOfDay, now).length('seconds') * 0.00007272205;
   }
 
 }

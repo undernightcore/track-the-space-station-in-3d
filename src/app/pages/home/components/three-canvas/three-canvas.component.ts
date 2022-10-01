@@ -1,7 +1,7 @@
 import {AfterViewInit, Component, ElementRef, ViewChild} from '@angular/core';
 import {Camera, Renderer, Scene} from "three";
 import {RendererService} from "../../../../services/renderer.service";
-import {debounceTime, fromEvent} from "rxjs";
+import {debounceTime, fromEvent, timer} from "rxjs";
 import {Earth} from "../../../../models/earth.model";
 import {LoaderService} from "../../../../services/loader.service";
 import {Sun} from "../../../../models/sun.model";
@@ -16,8 +16,9 @@ export class ThreeCanvasComponent implements AfterViewInit {
   renderer!: Renderer;
   camera!: Camera;
   scene!: Scene;
-  earth!: Earth;
+  earth?: Earth;
   sun!: Sun;
+  frames = 0;
 
   @ViewChild('canvasContainer') canvasContainer!: ElementRef;
 
@@ -67,8 +68,13 @@ export class ThreeCanvasComponent implements AfterViewInit {
     this.canvasContainer.nativeElement.appendChild(this.renderer.domElement);
   }
 
+  #rotateEarth() {
+    this.earth?.mesh.rotateY(0.00007272205 / 60);
+  }
+
   #startThreeLoop = () => {
     requestAnimationFrame( this.#startThreeLoop );
+    this.#rotateEarth();
     this.renderer.render( this.scene, this.camera );
   }
 
