@@ -5,6 +5,7 @@ import {debounceTime, delay, forkJoin, fromEvent, startWith} from "rxjs";
 import {Earth} from "../../../../models/earth.model";
 import {LoaderService} from "../../../../services/loader.service";
 import {Sun} from "../../../../models/sun.model";
+import {Stars} from "../../../../models/stars.model";
 
 @Component({
   selector: 'app-three-canvas',
@@ -18,6 +19,7 @@ export class ThreeCanvasComponent implements AfterViewInit {
   scene!: Scene;
   earth!: Earth;
   sun!: Sun;
+  stars!: Stars;
 
   @ViewChild('canvasContainer') canvasContainer!: ElementRef;
 
@@ -57,6 +59,7 @@ export class ThreeCanvasComponent implements AfterViewInit {
           console.log('not loading')
           this.sun = new Sun(this.scene,textures.sun)
           this.earth = new Earth(this.scene, textures.earth)
+          this.stars = new Stars(this.scene, 5000)
         }
       }
     )
