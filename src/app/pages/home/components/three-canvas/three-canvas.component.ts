@@ -1,5 +1,5 @@
 import {AfterViewInit, Component, ElementRef, ViewChild} from '@angular/core';
-import {Camera, PerspectiveCamera, Renderer, Scene} from "three";
+import {Camera, PerspectiveCamera, Renderer, Scene, WebGLRenderer} from "three";
 import {RendererService} from "../../../../services/renderer.service";
 import {debounceTime, delay, forkJoin, fromEvent, Observable, startWith} from "rxjs";
 import {Earth} from "../../../../models/earth.model";
