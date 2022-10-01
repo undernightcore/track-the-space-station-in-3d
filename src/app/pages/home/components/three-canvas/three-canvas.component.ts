@@ -2,6 +2,8 @@ import {AfterViewInit, Component, ElementRef, ViewChild} from '@angular/core';
 import {Camera, Renderer, Scene} from "three";
 import {RendererService} from "../../../../services/renderer.service";
 import {debounceTime, fromEvent} from "rxjs";
+import {Earth} from "../../../../models/earth.model";
+import {LoaderService} from "../../../../services/loader.service";
 
 @Component({
   selector: 'app-three-canvas',
@@ -13,15 +15,17 @@ export class ThreeCanvasComponent implements AfterViewInit {
   renderer!: Renderer;
   camera!: Camera;
   scene!: Scene;
+  earth!: Earth;
 
   @ViewChild('canvasContainer') canvasContainer!: ElementRef;
 
-  constructor(private rendererService: RendererService) { }
+  constructor(private rendererService: RendererService, private loaderService: LoaderService) { }
 
   ngAfterViewInit(): void {
     this.#initializeThree();
     this.#handleResizing();
     this.#startThreeLoop();
+    this.#initializeObjects();
   }
 
   #handleResizing() {
@@ -38,6 +42,16 @@ export class ThreeCanvasComponent implements AfterViewInit {
     this.camera = this.rendererService.camera;
     this.#createCanvasContainer();
     this.rendererService.resizeRenderer();
+  }
+
+  #initializeObjects() {
+    this.#addEarth();
+  }
+
+  #addEarth() {
+    this.loaderService.loadTexture('assets/textures/8k_earth_daymap.jpeg').subscribe((texture) => {
+      this.earth = new Earth(this.scene, texture);
+    })
   }
 
   #createCanvasContainer() {
