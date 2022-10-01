@@ -16,7 +16,7 @@ export class Stars {
     let coods: number[] = new Array(this.amount * 3).fill(0)
       .map(() => (Math.random() - 0.5) * 2000000000);
     this.geometry.setAttribute('position', new Float32BufferAttribute(coods, 3));
-    this.geometry.scale ( 90, 90, 90);
+    this.material.size = 250000;
     this.points = new Points(this.geometry, this.material);
     this.scene.add(this.points);
   }
