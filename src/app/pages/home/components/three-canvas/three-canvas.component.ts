@@ -8,6 +8,7 @@ import {Sun} from "../../../../models/sun.model";
 import {Stars} from "../../../../models/stars.model";
 import {ISS} from "../../../../models/iss.model";
 import {VRButton} from "three/examples/jsm/webxr/VRButton";
+import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 
 @Component({
   selector: 'app-three-canvas',
@@ -18,6 +19,7 @@ export class ThreeCanvasComponent implements AfterViewInit {
 
   renderer!: WebGLRenderer;
   camera!: Camera;
+  controls!: OrbitControls;
   scene!: Scene;
   earth?: Earth;
   sun!: Sun;
@@ -51,6 +53,7 @@ export class ThreeCanvasComponent implements AfterViewInit {
     this.scene = new Scene();
     this.renderer = this.rendererService.renderer;
     this.camera = this.rendererService.camera;
+    this.controls = this.rendererService.controls;
     this.#createCanvasContainer();
     this.rendererService.resizeRenderer();
   }
@@ -99,6 +102,7 @@ export class ThreeCanvasComponent implements AfterViewInit {
     requestAnimationFrame(this.#startThreeLoop);
     this.#rotateEarth();
     this.renderer.render(this.scene, this.camera);
+    this.controls.update();
   }
 
 }
