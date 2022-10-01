@@ -1,5 +1,5 @@
 import {AfterViewInit, Component, ElementRef, ViewChild} from '@angular/core';
-import {Camera, Scene, WebGLRenderer} from "three";
+import {PerspectiveCamera, Scene, WebGLRenderer} from "three";
 import {RendererService} from "../../../../services/renderer.service";
 import {debounceTime, delay, forkJoin, fromEvent, startWith} from "rxjs";
 import {Earth} from "../../../../models/earth.model";
@@ -7,6 +7,8 @@ import {LoaderService} from "../../../../services/loader.service";
 import {Sun} from "../../../../models/sun.model";
 import {Stars} from "../../../../models/stars.model";
 import {ISS} from "../../../../models/iss.model";
+import {AppManagerService} from "../../../../services/app-manager.service";
+import {gsap} from "gsap";
 import {VRButton} from "three/examples/jsm/webxr/VRButton";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 
@@ -18,7 +20,7 @@ import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 export class ThreeCanvasComponent implements AfterViewInit {
 
   renderer!: WebGLRenderer;
-  camera!: Camera;
+  camera!: PerspectiveCamera;
   controls!: OrbitControls;
   scene!: Scene;
   earth?: Earth;
@@ -28,7 +30,11 @@ export class ThreeCanvasComponent implements AfterViewInit {
 
   @ViewChild('canvasContainer') canvasContainer!: ElementRef;
 
-  constructor(private rendererService: RendererService, private loaderService: LoaderService) {
+  constructor(
+    private rendererService: RendererService,
+    private loaderService: LoaderService,
+    private appManagerService: AppManagerService
+  ) {
   }
 
   ngAfterViewInit(): void {
@@ -61,18 +67,17 @@ export class ThreeCanvasComponent implements AfterViewInit {
   #initializeObjects() {
     forkJoin({
       earth: this.#getEarth(),
+      darkEarth: this.#getDarkEarth(),
       sun: this.#getSun(),
       iss: this.#getISS()
     }).pipe(delay(2000), startWith(null)).subscribe((textures) => {
-        if (textures === null) {
-          console.log('loading')
-        } else {
-          console.log('not loading')
-          this.sun = new Sun(this.scene, textures.sun)
-          this.earth = new Earth(this.scene, textures.earth)
-          this.stars = new Stars(this.scene, 5000)
-          this.iss = new ISS(this.scene, textures.iss)
-        }
+        if (!textures) return;
+        this.appManagerService.loading.next(false);
+        this.sun = new Sun(this.scene, textures.sun)
+        this.earth = new Earth(this.scene, textures.earth, textures.darkEarth)
+        this.stars = new Stars(this.scene, 5000)
+        this.iss = new ISS(this.scene, textures.iss)
+        this.#startZoomAnimation()
       }
     )
   }
@@ -81,12 +86,37 @@ export class ThreeCanvasComponent implements AfterViewInit {
     return this.loaderService.loadTexture('assets/textures/8k_earth_daymap.jpeg')
   }
 
+  #getDarkEarth() {
+    return this.loaderService.loadTexture('assets/textures/8k_earth_nightmap.jpeg')
+  }
+
   #getSun() {
     return this.loaderService.loadTexture('assets/textures/8k_sun.jpeg')
   }
 
   #getISS() {
     return this.loaderService.loadModel('assets/models/ISS_stationary.glb')
+  }
+
+  #startZoomAnimation() {
+    this.appManagerService.ready.subscribe((status) => {
+      if (!status) return;
+      gsap.fromTo(this.camera.position,
+        {
+          z: 148000000
+        },
+        {
+          z: 150000000 - 6371 - 20000,
+          duration: 5,
+          onStart: () => {
+            this.rendererService.controls.update();
+          },
+          onUpdate: () => {
+            this.camera.updateProjectionMatrix();
+          }
+        }
+      )
+    })
   }
 
 
@@ -99,10 +129,11 @@ export class ThreeCanvasComponent implements AfterViewInit {
   }
 
   #startThreeLoop = () => {
-    requestAnimationFrame(this.#startThreeLoop);
-    this.#rotateEarth();
-    this.renderer.render(this.scene, this.camera);
-    this.controls.update();
+    this.renderer.setAnimationLoop(() => {
+      this.renderer.render(this.scene, this.camera);
+      this.#rotateEarth();
+      this.controls.update();
+    })
   }
 
 }

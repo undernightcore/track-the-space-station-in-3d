@@ -1,0 +1,13 @@
+<div class="start-screen">
+  <img class="start-screen__logo" src="assets/images/space-apps.png">
+  <mat-spinner
+    *ngIf="(appManagerService.loading | async)"
+    diameter="60"
+  ></mat-spinner>
+  <button (click)="ready.emit()"
+          *ngIf="!(appManagerService.loading | async)"
+          mat-icon-button
+          color="primary">
+    <mat-icon>play_arrow</mat-icon>
+  </button>
+</div>
