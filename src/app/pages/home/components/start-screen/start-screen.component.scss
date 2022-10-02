@@ -1,0 +1,28 @@
+.start-screen {
+  position: fixed;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: black;
+  height: 100vh;
+  width: 100vw;
+
+  &__logo {
+    width: 20%;
+  }
+
+  &::ng-deep {
+    mat-spinner {
+      margin-top: 20px;
+    }
+    .mat-progress-spinner circle, .mat-spinner circle {
+      stroke: #ffffff;
+    }
+  }
+
+  & button {
+    margin-top: 20px;
+  }
+}

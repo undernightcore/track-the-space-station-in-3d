@@ -1,4 +1,5 @@
 import {AfterViewInit, Component, ElementRef, ViewChild} from '@angular/core';
+import {PerspectiveCamera, Scene, WebGLRenderer} from "three";
 import {Camera, Scene, WebGLRenderer} from "three";
 import {RendererService} from "../../../../services/renderer.service";
 import {debounceTime, delay, forkJoin, fromEvent, startWith} from "rxjs";
@@ -9,7 +10,10 @@ import {Stars} from "../../../../models/stars.model";
 import {TLEService} from "../../../../services/tle.service";
 import {ISS} from "../../../../models/iss.model";
 import {VRButton} from "three/examples/jsm/webxr/VRButton";
-
+import {AppManagerService} from "../../../../services/app-manager.service";
+import {gsap} from "gsap";
+import {VRButton} from "three/examples/jsm/webxr/VRButton";
+import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 
 @Component({
   selector: 'app-three-canvas',
@@ -19,7 +23,8 @@ import {VRButton} from "three/examples/jsm/webxr/VRButton";
 export class ThreeCanvasComponent implements AfterViewInit {
 
   renderer!: WebGLRenderer;
-  camera!: Camera;
+  camera!: PerspectiveCamera;
+  controls!: OrbitControls;
   scene!: Scene;
   earth?: Earth;
   sun!: Sun;
@@ -28,7 +33,12 @@ export class ThreeCanvasComponent implements AfterViewInit {
 
   @ViewChild('canvasContainer') canvasContainer!: ElementRef;
 
-  constructor(private rendererService: RendererService, private loaderService: LoaderService, private tleService: TLEService) {
+  constructor(
+    private rendererService: RendererService,
+    private loaderService: LoaderService,
+    private appManagerService: AppManagerService,
+    private tleService: TLEService
+  ) {
   }
 
   ngAfterViewInit(): void {
@@ -54,6 +64,7 @@ export class ThreeCanvasComponent implements AfterViewInit {
     this.scene = new Scene();
     this.renderer = this.rendererService.renderer;
     this.camera = this.rendererService.camera;
+    this.controls = this.rendererService.controls;
     this.#createCanvasContainer();
     this.rendererService.resizeRenderer();
 
@@ -62,24 +73,41 @@ export class ThreeCanvasComponent implements AfterViewInit {
   #initializeObjects() {
     forkJoin({
       earth: this.#getEarth(),
+      darkEarth: this.#getDarkEarth(),
       sun: this.#getSun(),
-      iss: this.#getISS()
+      iss: this.#getISS(),
+      audio: this.#getAudio()
     }).pipe(delay(2000), startWith(null)).subscribe((textures) => {
-        if (textures === null) {
-          console.log('loading')
-        } else {
-          console.log('not loading')
+        if (!textures) return;
+        this.rendererService.setMusic(textures.audio);
+        this.appManagerService.loading.next(false);
           this.sun = new Sun(this.scene, textures.sun)
-          this.earth = new Earth(this.scene, textures.earth)
-          this.stars = new Stars(this.scene, 5000)
-          this.iss = new ISS(this.scene, textures.iss)
-        }
+          this.earth = new Earth(this.scene, textures.earth, textures.darkEarth)
+        this.stars = new Stars(this.scene, 5000)
+        this.iss = new ISS(this.scene, textures.iss)
+        this.appManagerService.ready.subscribe((status) => {
+          if (!status) return;
+          this.#startZoomAnimation()
+          this.#playMusic();
+        })
       }
     )
   }
 
+  #playMusic() {
+    this.rendererService.backSound.play();
+  }
+
+  #getAudio() {
+    return this.loaderService.loadAudio('assets/music/bgMusic.mp3');
+  }
+
   #getEarth() {
     return this.loaderService.loadTexture('assets/textures/8k_earth_daymap.jpeg')
+  }
+
+  #getDarkEarth() {
+    return this.loaderService.loadTexture('assets/textures/8k_earth_nightmap.jpeg')
   }
 
   #getSun() {
@@ -88,6 +116,24 @@ export class ThreeCanvasComponent implements AfterViewInit {
 
   #getISS() {
     return this.loaderService.loadModel('assets/models/ISS_stationary.glb')
+  }
+
+  #startZoomAnimation() {
+    gsap.fromTo(this.camera.position,
+      {
+        z: 149800000
+      },
+      {
+        z: 150000000 - 6371 - 20000,
+        duration: 3,
+        onStart: () => {
+          this.rendererService.controls.update();
+        },
+        onUpdate: () => {
+          this.camera.updateProjectionMatrix();
+        }
+      }
+    )
   }
 
 
@@ -111,14 +157,15 @@ export class ThreeCanvasComponent implements AfterViewInit {
 
 
   #rotateEarth() {
-    this.earth?.mesh.rotateY(0.00007272205 / 60);
+    this.earth?.mesh.rotateY(0.00007292123513278419 / 60);
   }
 
   #startThreeLoop = () => {
-    requestAnimationFrame(this.#startThreeLoop);
-    this.#updateISSposition();
-    this.#rotateEarth();
-    this.renderer.render(this.scene, this.camera);
+    this.renderer.setAnimationLoop(() => {
+      this.renderer.render(this.scene, this.camera);
+      this.#rotateEarth();
+      this.controls.update();
+    })
   }
 
 }
