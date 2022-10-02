@@ -11,6 +11,7 @@ import {ISS} from "../../../../models/iss.model";
 import {AppManagerService} from "../../../../services/app-manager.service";
 import {gsap} from "gsap";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
+import {VRButton} from "three/examples/jsm/webxr/VRButton";
 
 @Component({
   selector: 'app-three-canvas',
@@ -64,6 +65,7 @@ export class ThreeCanvasComponent implements AfterViewInit {
     this.controls = this.rendererService.controls;
     this.#createCanvasContainer();
     this.rendererService.resizeRenderer();
+    document.body.appendChild( VRButton.createButton( this.renderer ) );
   }
 
   #initializeObjects() {
