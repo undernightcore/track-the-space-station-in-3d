@@ -23,6 +23,7 @@ export class Earth {
   }
 
   #initialize() {
+    this.mesh.rotateX(0.41015237422);
     this.mesh.rotateY(1.57 * 3);
     this.mesh.rotateY(this.#getAngleFromDate());
     this.mesh.position.set(0, 0, 150000000);
@@ -32,7 +33,7 @@ export class Earth {
   #getAngleFromDate() {
     const startOfDay = DateTime.now().toUTC().startOf('day');
     const now = DateTime.now().toUTC();
-    return Interval.fromDateTimes(startOfDay, now).length('seconds') * 0.00007272205;
+    return Interval.fromDateTimes(startOfDay, now).length('seconds') * 0.00007292123513278419;
   }
 
 }
