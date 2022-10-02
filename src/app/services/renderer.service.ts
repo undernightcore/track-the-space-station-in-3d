@@ -11,13 +11,11 @@ export class RendererService {
   #controls: OrbitControls;
   #renderer: WebGLRenderer;
   #listener: AudioListener;
-  #audioLoader: AudioLoader;
   #bgSound: Audio;
 
   constructor() {
     this.#renderer = new WebGLRenderer({antialias: true});
     this.#listener = new AudioListener();
-    this.#audioLoader = new AudioLoader();
     this.#bgSound = new Audio(this.#listener);
     this.#camera = new PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 900000000);
     this.#camera.add(this.#listener);
@@ -29,12 +27,13 @@ export class RendererService {
     this.#controls.target = new Vector3(0, 0, 150000000);
     this.#controls.enableDamping = true;
     this.#controls.dampingFactor = 0.05;
-    this.#audioLoader.load('assets/music/bgMusic.mp3', (buffer)=>{
-      this.#bgSound.setBuffer(buffer);
-      this.#bgSound.setLoop(true);
-      this.#bgSound.setVolume(0.4);
-    })
     this.resizeRenderer();
+  }
+
+  setMusic(buffer: AudioBuffer) {
+    this.#bgSound.setBuffer(buffer);
+    this.#bgSound.setLoop(true);
+    this.#bgSound.setVolume(0.4);
   }
 
   get renderer() {

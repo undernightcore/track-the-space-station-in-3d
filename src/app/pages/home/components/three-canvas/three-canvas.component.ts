@@ -69,17 +69,31 @@ export class ThreeCanvasComponent implements AfterViewInit {
       earth: this.#getEarth(),
       darkEarth: this.#getDarkEarth(),
       sun: this.#getSun(),
-      iss: this.#getISS()
+      iss: this.#getISS(),
+      audio: this.#getAudio()
     }).pipe(delay(2000), startWith(null)).subscribe((textures) => {
         if (!textures) return;
+        this.rendererService.setMusic(textures.audio);
         this.appManagerService.loading.next(false);
         this.sun = new Sun(this.scene, textures.sun)
         this.earth = new Earth(this.scene, textures.earth, textures.darkEarth)
         this.stars = new Stars(this.scene, 5000)
         this.iss = new ISS(this.scene, textures.iss)
-        this.#startZoomAnimation()
+        this.appManagerService.ready.subscribe((status) => {
+          if (!status) return;
+          this.#startZoomAnimation()
+          this.#playMusic();
+        })
       }
     )
+  }
+
+  #playMusic() {
+    this.rendererService.backSound.play();
+  }
+
+  #getAudio() {
+    return this.loaderService.loadAudio('assets/music/bgMusic.mp3');
   }
 
   #getEarth() {
@@ -99,25 +113,21 @@ export class ThreeCanvasComponent implements AfterViewInit {
   }
 
   #startZoomAnimation() {
-    this.appManagerService.ready.subscribe((status) => {
-      if (!status) return;
-      this.rendererService.backSound.play();
-      gsap.fromTo(this.camera.position,
-        {
-          z: 149800000
+    gsap.fromTo(this.camera.position,
+      {
+        z: 149800000
+      },
+      {
+        z: 150000000 - 6371 - 20000,
+        duration: 3,
+        onStart: () => {
+          this.rendererService.controls.update();
         },
-        {
-          z: 150000000 - 6371 - 20000,
-          duration: 3,
-          onStart: () => {
-            this.rendererService.controls.update();
-          },
-          onUpdate: () => {
-            this.camera.updateProjectionMatrix();
-          }
+        onUpdate: () => {
+          this.camera.updateProjectionMatrix();
         }
-      )
-    })
+      }
+    )
   }
 
 
