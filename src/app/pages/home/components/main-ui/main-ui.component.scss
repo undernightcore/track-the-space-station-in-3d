@@ -1,11 +1,28 @@
 .main-ui {
-
   font-family: Monocraft;
   color: white;
 
   &__title {
     position: fixed;
     top: 20px;
+    left: 20px;
+  }
+
+  &__bar {
+    position: fixed;
+    top: 30px;
+    left: 20px;
+  }
+
+  &__lat {
+    position: fixed;
+    top: 50px;
+    left: 20px;
+  }
+
+  &__lng {
+    position: fixed;
+    top: 70px;
     left: 20px;
   }
 }

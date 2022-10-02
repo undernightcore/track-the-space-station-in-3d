@@ -6,10 +6,10 @@ import {Earth} from "../../../../models/earth.model";
 import {LoaderService} from "../../../../services/loader.service";
 import {Sun} from "../../../../models/sun.model";
 import {Stars} from "../../../../models/stars.model";
+import {TLEService} from "../../../../services/tle.service";
 import {ISS} from "../../../../models/iss.model";
 import {AppManagerService} from "../../../../services/app-manager.service";
 import {gsap} from "gsap";
-import {VRButton} from "three/examples/jsm/webxr/VRButton";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 
 @Component({
@@ -33,7 +33,8 @@ export class ThreeCanvasComponent implements AfterViewInit {
   constructor(
     private rendererService: RendererService,
     private loaderService: LoaderService,
-    private appManagerService: AppManagerService
+    private appManagerService: AppManagerService,
+    private tleService: TLEService
   ) {
   }
 
@@ -42,10 +43,10 @@ export class ThreeCanvasComponent implements AfterViewInit {
     this.#handleResizing();
     this.#startThreeLoop();
     this.#initializeObjects();
-    document.body.appendChild(VRButton.createButton(this.renderer));
-    this.renderer.xr.enabled = true;
+
 
   }
+
 
   #handleResizing() {
     fromEvent(window, 'resize')
@@ -56,6 +57,7 @@ export class ThreeCanvasComponent implements AfterViewInit {
   }
 
   #initializeThree() {
+    this.tleService.storeISSTLEnow();
     this.scene = new Scene();
     this.renderer = this.rendererService.renderer;
     this.camera = this.rendererService.camera;
@@ -135,6 +137,21 @@ export class ThreeCanvasComponent implements AfterViewInit {
     this.canvasContainer.nativeElement.appendChild(this.renderer.domElement);
   }
 
+  #updateISSposition() {
+    const earthPosition = this.earth?.mesh.position
+    const ISScords = this.tleService.getGeocentricISSCords();
+
+    if (earthPosition && typeof ISScords === "object") {
+      const issFinalCords = {
+        x: earthPosition.x + ISScords.x,
+        y: earthPosition.y + ISScords.y,
+        z: earthPosition.z + ISScords.z,
+      }
+      this.iss.gltf.scene.position.set(issFinalCords.x, issFinalCords.y, issFinalCords.z)
+    }
+  }
+
+
   #rotateEarth() {
     this.earth?.mesh.rotateY(0.00007292123513278419 / 60);
   }
@@ -143,7 +160,9 @@ export class ThreeCanvasComponent implements AfterViewInit {
     this.renderer.setAnimationLoop(() => {
       this.renderer.render(this.scene, this.camera);
       this.#rotateEarth();
+      this.#updateISSposition();
       this.controls.update();
+      this.tleService.issPosition.next(this.tleService.getISSLatLongTLEnow())
     })
   }
 
