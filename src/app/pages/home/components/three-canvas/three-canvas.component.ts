@@ -101,6 +101,7 @@ export class ThreeCanvasComponent implements AfterViewInit {
   #startZoomAnimation() {
     this.appManagerService.ready.subscribe((status) => {
       if (!status) return;
+      this.rendererService.backSound.play();
       gsap.fromTo(this.camera.position,
         {
           z: 149800000
