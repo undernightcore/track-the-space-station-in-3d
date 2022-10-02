@@ -1,6 +1,5 @@
 import {AfterViewInit, Component, ElementRef, ViewChild} from '@angular/core';
 import {PerspectiveCamera, Scene, WebGLRenderer} from "three";
-import {Camera, Scene, WebGLRenderer} from "three";
 import {RendererService} from "../../../../services/renderer.service";
 import {debounceTime, delay, forkJoin, fromEvent, startWith} from "rxjs";
 import {Earth} from "../../../../models/earth.model";
@@ -9,10 +8,8 @@ import {Sun} from "../../../../models/sun.model";
 import {Stars} from "../../../../models/stars.model";
 import {TLEService} from "../../../../services/tle.service";
 import {ISS} from "../../../../models/iss.model";
-import {VRButton} from "three/examples/jsm/webxr/VRButton";
 import {AppManagerService} from "../../../../services/app-manager.service";
 import {gsap} from "gsap";
-import {VRButton} from "three/examples/jsm/webxr/VRButton";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 
 @Component({
@@ -46,8 +43,8 @@ export class ThreeCanvasComponent implements AfterViewInit {
     this.#handleResizing();
     this.#startThreeLoop();
     this.#initializeObjects();
-    document.body.appendChild(VRButton.createButton(this.renderer));
-    this.renderer.xr.enabled = true;
+
+
   }
 
 
@@ -67,7 +64,6 @@ export class ThreeCanvasComponent implements AfterViewInit {
     this.controls = this.rendererService.controls;
     this.#createCanvasContainer();
     this.rendererService.resizeRenderer();
-
   }
 
   #initializeObjects() {
@@ -81,8 +77,8 @@ export class ThreeCanvasComponent implements AfterViewInit {
         if (!textures) return;
         this.rendererService.setMusic(textures.audio);
         this.appManagerService.loading.next(false);
-          this.sun = new Sun(this.scene, textures.sun)
-          this.earth = new Earth(this.scene, textures.earth, textures.darkEarth)
+        this.sun = new Sun(this.scene, textures.sun)
+        this.earth = new Earth(this.scene, textures.earth, textures.darkEarth)
         this.stars = new Stars(this.scene, 5000)
         this.iss = new ISS(this.scene, textures.iss)
         this.appManagerService.ready.subscribe((status) => {
@@ -164,7 +160,9 @@ export class ThreeCanvasComponent implements AfterViewInit {
     this.renderer.setAnimationLoop(() => {
       this.renderer.render(this.scene, this.camera);
       this.#rotateEarth();
+      this.#updateISSposition();
       this.controls.update();
+      this.tleService.issPosition.next(this.tleService.getISSLatLongTLEnow())
     })
   }
 
