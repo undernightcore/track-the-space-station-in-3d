@@ -4,4 +4,7 @@
   *ngIf="(appManagerService.loading | async) || !(appManagerService.ready | async)">
 </app-start-screen>
 <app-main-ui></app-main-ui>
+<div *ngIf="appManagerService.bottomButtons">
+  <ng-container *ngTemplateOutlet="appManagerService.bottomButtons"></ng-container>
+</div>
 <app-three-canvas></app-three-canvas>
