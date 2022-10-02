@@ -19,7 +19,6 @@ export class RendererService {
   }
 
   #initialize() {
-    this.#camera.position.z = -100000000000
     this.#controls.target.set(0, 0, 150000000);
     this.resizeRenderer();
   }

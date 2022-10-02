@@ -100,11 +100,11 @@ export class ThreeCanvasComponent implements AfterViewInit {
       if (!status) return;
       gsap.fromTo(this.camera.position,
         {
-          z: 148000000
+          z: 149800000
         },
         {
           z: 150000000 - 6371 - 20000,
-          duration: 5,
+          duration: 3,
           onStart: () => {
             this.rendererService.controls.update();
           },
@@ -122,7 +122,7 @@ export class ThreeCanvasComponent implements AfterViewInit {
   }
 
   #rotateEarth() {
-    this.earth?.mesh.rotateY(0.00007272205 / 60);
+    this.earth?.mesh.rotateY(0.00007292123513278419 / 60);
   }
 
   #startThreeLoop = () => {
