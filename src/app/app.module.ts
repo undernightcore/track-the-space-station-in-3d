@@ -11,13 +11,15 @@ import { StartScreenComponent } from './pages/home/components/start-screen/start
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 import {MatButtonModule} from "@angular/material/button";
 import {MatIconModule} from "@angular/material/icon";
+import { MainUiComponent } from './pages/home/components/main-ui/main-ui.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     HomeComponent,
     ThreeCanvasComponent,
-    StartScreenComponent
+    StartScreenComponent,
+    MainUiComponent
   ],
   imports: [
     BrowserModule,
