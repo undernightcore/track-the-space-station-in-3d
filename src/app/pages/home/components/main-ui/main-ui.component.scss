@@ -1,0 +1,11 @@
+.main-ui {
+
+  font-family: Monocraft;
+  color: white;
+
+  &__title {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+  }
+}
