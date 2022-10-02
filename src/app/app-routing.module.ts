@@ -4,7 +4,7 @@ import {HomeComponent} from "./pages/home/home.component";
 
 const routes: Routes = [
   {
-    title: 'ISS',
+    title: 'ISS | MercaSpace',
     path: '',
     component: HomeComponent
   }
