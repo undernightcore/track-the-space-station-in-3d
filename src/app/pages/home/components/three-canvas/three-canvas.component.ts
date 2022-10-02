@@ -1,5 +1,5 @@
-import {AfterViewInit, Component, ElementRef, ViewChild} from '@angular/core';
-import {PerspectiveCamera, Scene, WebGLRenderer} from "three";
+import {AfterViewInit, Component, ElementRef, TemplateRef, ViewChild} from '@angular/core';
+import {PerspectiveCamera, Scene, Vector3, WebGLRenderer} from "three";
 import {RendererService} from "../../../../services/renderer.service";
 import {debounceTime, delay, forkJoin, fromEvent, startWith} from "rxjs";
 import {Earth} from "../../../../models/earth.model";
@@ -28,8 +28,10 @@ export class ThreeCanvasComponent implements AfterViewInit {
   sun!: Sun;
   stars!: Stars;
   iss!: ISS;
+  loopFunctions: { [key: string]: () => void } = {};
 
   @ViewChild('canvasContainer') canvasContainer!: ElementRef;
+  @ViewChild('buttonsTemplate') buttonsTemplate!: TemplateRef<any>;
 
   constructor(
     private rendererService: RendererService,
@@ -44,8 +46,7 @@ export class ThreeCanvasComponent implements AfterViewInit {
     this.#handleResizing();
     this.#startThreeLoop();
     this.#initializeObjects();
-
-
+    this.appManagerService.bottomButtons = this.buttonsTemplate;
   }
 
 
@@ -134,6 +135,42 @@ export class ThreeCanvasComponent implements AfterViewInit {
     )
   }
 
+  cameraToISS() {
+    const issPosition = this.iss.gltf.scene.position;
+    gsap.to(this.camera.position,
+      {
+        z: issPosition.z,
+        x: issPosition.x - 1000,
+        y: issPosition.y,
+        duration: 3,
+        onStart: () => {
+          this.rendererService.controls.update();
+        },
+        onUpdate: () => {
+          this.camera.updateProjectionMatrix();
+          this.controls.update()
+        },
+        onComplete: () => {
+          delete this.loopFunctions['followISS'];
+          this.loopFunctions['followISS'] = () => this.followVector(issPosition);
+        }
+      }
+    )
+  }
+
+  followVector(issPosition: Vector3) {
+    this.camera.position.set(
+      issPosition.x - 1000,
+      issPosition.y,
+      issPosition.z,
+    )
+    this.controls.update()
+
+  }
+
+  clearFollowISS() {
+    delete this.loopFunctions['followISS'];
+  }
 
   #createCanvasContainer() {
     this.canvasContainer.nativeElement.appendChild(this.renderer.domElement);
@@ -165,6 +202,7 @@ export class ThreeCanvasComponent implements AfterViewInit {
       this.#updateISSposition();
       this.controls.update();
       this.tleService.issPosition.next(this.tleService.getISSLatLongTLEnow())
+      Object.values(this.loopFunctions).forEach(fun => fun());
     })
   }
 
