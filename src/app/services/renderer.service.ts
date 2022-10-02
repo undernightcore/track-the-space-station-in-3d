@@ -24,6 +24,7 @@ export class RendererService {
   }
 
   #initialize() {
+    this.renderer.xr.enabled = true;
     this.#controls.target = new Vector3(0, 0, 150000000);
     this.#controls.enableDamping = true;
     this.#controls.dampingFactor = 0.05;
