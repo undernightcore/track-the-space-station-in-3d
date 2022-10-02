@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {PerspectiveCamera, WebGLRenderer} from "three";
+import {PerspectiveCamera, Vector3, WebGLRenderer} from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 
 @Injectable({
@@ -19,7 +19,9 @@ export class RendererService {
   }
 
   #initialize() {
-    this.#controls.target.set(0, 0, 150000000);
+    this.#controls.target = new Vector3(0, 0, 150000000);
+    this.#controls.enableDamping = true;
+    this.#controls.dampingFactor = 0.05;
     this.resizeRenderer();
   }
 
